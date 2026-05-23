@@ -96,16 +96,32 @@ namespace Ecommerce.Web.Areas.Customer.Controllers
         {
             var order = new Order();
             order.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            order.ShoppingCartItems = _unitOfWork.ShoppingCart.GetAll(x => x.UserId == order.UserId, includeEntities: "Product");
-            order.Total = order.ShoppingCartItems.Sum(p => p.Amount * p.Product!.Price);
+            var shoppingCartItems = _unitOfWork.ShoppingCart.GetAll(x => x.UserId == order.UserId, includeEntities: "Product");
+            order.OrderItems = shoppingCartItems.Select(x => new OrderItem()
+            {
+                // OrderId = order.Id,
+                ProductId = x.ProductId,
+                Product = _unitOfWork.Product.GetOne(p => p.Id == x.ProductId),
+                Price = x.Product!.Price,
+                Amount = x.Amount
+            });
+            order.Total = shoppingCartItems.Sum(p => p.Amount * p.Product!.Price);
             return View(order);
         }
         [HttpPost]
         public IActionResult Checkout(Order order)
         {
             order.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-            order.ShoppingCartItems = _unitOfWork.ShoppingCart.GetAll(x => x.UserId == order.UserId, includeEntities: "Product");
-            order.Total = order.ShoppingCartItems.Sum(p => p.Amount * p.Product!.Price);
+            var shoppingCartItems = _unitOfWork.ShoppingCart.GetAll(x => x.UserId == order.UserId, includeEntities: "Product");
+            order.OrderItems = shoppingCartItems.Select(x => new OrderItem()
+            {
+                //OrderId = order.Id,
+                ProductId = x.ProductId,
+                Product = _unitOfWork.Product.GetOne(p => p.Id == x.ProductId),
+                Price = x.Product!.Price,
+                Amount = x.Amount
+            }).ToList();
+            order.Total = order.OrderItems.Sum(p => p.Amount * p.Product!.Price);
             if (!ModelState.IsValid)
             {
                 return View(order);
@@ -126,7 +142,7 @@ namespace Ecommerce.Web.Areas.Customer.Controllers
                 CancelUrl = domain + $"Customer/ShoppingCarts/index",
             };
 
-            foreach (var item in order.ShoppingCartItems!)
+            foreach (var item in order.OrderItems!)
             {
                 var sessionLineOption = new SessionLineItemOptions
                 {
@@ -147,7 +163,6 @@ namespace Ecommerce.Web.Areas.Customer.Controllers
             var service = new SessionService();
             Session session = service.Create(options);
             order.SessionId = session.Id;
-            order.PaymentIntentId = session.PaymentIntentId;
 
             _unitOfWork.Order.Update(order);
             _unitOfWork.Complete();
@@ -158,19 +173,28 @@ namespace Ecommerce.Web.Areas.Customer.Controllers
 
         public IActionResult CheckoutSuccess(int orderId)
         {
-            var order = _unitOfWork.Order.GetOne(x => x.Id == orderId, "ShoppingCartItems");
+            var order = _unitOfWork.Order.GetOne(x => x.Id == orderId, "OrderItems");
             var session = new SessionService().Get(order!.SessionId);
             if (session.PaymentStatus.ToLower() == "paid")
             {
                 order.OrderStatus = Status.Approved;
                 order.PaymentStatus = Status.Approved;
+                order.PaymentIntentId = session.PaymentIntentId;
                 _unitOfWork.Order.Update(order);
                 _unitOfWork.Complete();
             }
             order.OrderStatus = Status.Approved;
             order.PaymentStatus = Status.Approved;
             _unitOfWork.Order.Update(order);
-            _unitOfWork.ShoppingCart.RemoveRange(order.ShoppingCartItems!);
+            var shoppingCartItems = _unitOfWork.ShoppingCart.GetAll(x => x.UserId == order.UserId, includeEntities: "Product");
+            order.OrderItems = shoppingCartItems.Select(x => new OrderItem()
+            {
+                OrderId = order.Id,
+                ProductId = x.ProductId,
+                Price = x.Product!.Price,
+                Amount = x.Amount
+            }).ToList();
+            _unitOfWork.ShoppingCart.RemoveRange(shoppingCartItems);
             _unitOfWork.Complete();
             return View(orderId);
         }

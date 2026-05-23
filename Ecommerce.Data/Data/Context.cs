@@ -16,6 +16,7 @@ namespace Ecommerce.DataAccess.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +36,9 @@ namespace Ecommerce.DataAccess.Data
 
             modelBuilder.Entity<ShoppingCartItem>()
                 .HasKey(e => new {e.ProductId, e.UserId});
+
+            modelBuilder.Entity<OrderItem>()
+                .HasKey(oi => new { oi.OrderId, oi.ProductId });
         }
 	}
 }

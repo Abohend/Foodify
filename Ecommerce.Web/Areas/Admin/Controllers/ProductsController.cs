@@ -11,6 +11,7 @@ namespace Ecommerce.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = CustomRoles.admin)]
+
     public class ProductsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
