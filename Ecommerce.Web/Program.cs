@@ -8,6 +8,8 @@ using Ecommerce.DataAccess.Data;
 using Ecommerce.DataAccess.Implementations;
 using Stripe;
 using FileService = Ecommerce.Web.Services.FileService;
+using Ecommerce.Web.Mapping;
+using Ecommerce.Web.Filters;
 
 namespace Ecommerce.Web
 {
@@ -18,9 +20,12 @@ namespace Ecommerce.Web
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddRazorPages();
-            builder.Services.AddDbContext<Context>(options => 
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<WebsiteViewCounterFilter>();
+            }).AddRazorRuntimeCompilation();
+            builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+            builder.Services.AddDbContext<Context>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
@@ -35,53 +40,19 @@ namespace Ecommerce.Web
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<FileService>();
             builder.Services.AddSingleton<IEmailSender, EmailSender>();
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
 
             var app = builder.Build();
 
-            // seed data
+            // Seed Database
             using (var scope = app.Services.CreateScope())
             {
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                
-                // seed roles
-                var roles = new[]
-                {
-                    new IdentityRole(CustomRoles.admin)
-                    {
-                        NormalizedName = CustomRoles.admin.ToUpper()
-                    },
-                    new IdentityRole(CustomRoles.customer)
-                    {
-                        NormalizedName = CustomRoles.customer.ToUpper()
-                    },
-                    new IdentityRole(CustomRoles.editor)
-                    {
-                        NormalizedName = CustomRoles.editor.ToUpper()
-                    }
-                };
-                foreach (var role in roles)
-                {
-                    if (!await roleManager.RoleExistsAsync(role.Name!))
-                    {
-                        await roleManager.CreateAsync(role);
-                    }
-                }
-
-                // seed default admin
-                if (await userManager.FindByEmailAsync("mhmdabohend@gmail.com") == null)
-                {
-                    var admin = new ApplicationUser()
-                    {
-
-                        Name = "Mohamed Abohend",
-                        Email = "mhmdabohend@gmail.com",
-                        UserName = "mhmdabohend@gmail.com"
-                    };
-                    var res = await userManager.CreateAsync(admin, "Mm@12345");
-                    await userManager.AddToRoleAsync(admin, CustomRoles.admin);
-                }
-            }
+                var services = scope.ServiceProvider;
+                var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                var configuration = services.GetRequiredService<IConfiguration>();
+                await DbInitializer.InitializeAsync(userManager, roleManager, configuration);
+            } 
 
 
             // Configure the HTTP request pipeline.
@@ -96,13 +67,11 @@ namespace Ecommerce.Web
 
             app.UseRouting();
 
+            app.UseStatusCodePagesWithReExecute("/errors/404");
+
             StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 
             app.UseAuthorization();
-
-            //app.MapControllerRoute(
-            //    name: "default",
-            //    pattern: "{area=Admin}/{controller=Products}/{action=Index}/{id?}");
 
             app.MapControllerRoute(
                 name: "Customer",
@@ -110,7 +79,7 @@ namespace Ecommerce.Web
 
             app.MapRazorPages();
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model ProductVM
+﻿@model ProductCategoriesVM
 
 @{
     ViewBag.PageTitle = "Edit Product";
@@ -6,12 +6,12 @@
 
 <div class="card my-4 mx-4">
     <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-        <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+        <div class="bg-gradient-success shadow-success border-radius-lg pt-4 pb-3">
             <h6 class="text-white text-capitalize ps-3">@ViewBag.PageTitle</h6>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <form asp-action="Edit" enctype="multipart/form-data">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Product.Id" />
@@ -33,7 +33,7 @@
                 </div>
                 <div class="form-group m-3">
                     <label asp-for="Product.Image" class="control-label"></label>
-                    <input type="file" name="file" class="form-control border px-3" />
+                    <input id="product-image" onchange="PreviewImage(event)" accept="image/*" type="file" name="file" class="form-control border px-3" />
                 </div>
                 <div class="form-group m-3">
                     <label asp-for="Product.CategoryId" class="control-label"></label>
@@ -43,13 +43,13 @@
                     <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
                 </div>
                 <div class="form-group mx-3">
-                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <input type="submit" value="Save" class="btn btn-success" />
                 </div>
             </form>
         </div>
 
-        <div class="col-md-8 d-flex justify-content-center align-items-center">
-            <img src="~/@Model.Product.Image" class="img-fluid w-50" />
+        <div class="col-md-4 d-flex justify-content-center align-items-center">
+            <img id="product-image-preview" src="~/@Model.Product.Image" class="img-fluid w-70" />
         </div>
     </div>
 </div>
@@ -60,6 +60,13 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("../Shared/_ValidationScriptsPartial");
+
+        <script>
+            function PreviewImage(event) {
+                    var imgHolder = document.getElementById('product-image-preview');
+                    imgHolder.src = URL.createObjectURL(event.target.files[0]);
+            }
+        </script>
     }
 }
 

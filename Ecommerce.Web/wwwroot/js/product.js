@@ -5,20 +5,23 @@ $(document).ready(function () {
 
 function loaddata() {
     dtble = $("#table").DataTable({
+        "responsive": true,
+        "pageLength": 5,
+        "lengthMenu": [[5, 7, 10, 15], [5, 7, 10, 15]],
         "ajax": {
             "url": "/Admin/Products/GetAllData"
         },
         "columns": [
             { "data": "name" },
             { "data": "description" },
-            { "data": "price" },
+            { "data": "price", "className": "text-start" },
             { "data": "category.name" },
             {
                 "data": "id",
                 "render": function (data) {
                     return `
-                            <a href="/Admin/Products/Edit/${data}" class="btn btn-warning">Edit</a>
-                            <a onClick=DeleteItem("/Admin/Products/Delete/${data}") class="btn btn-danger">Delete</a>
+                            <a href="/Admin/Products/Edit/${data}" class="btn btn-outline-warning">Edit</a>
+                            <a onClick=DeleteItem("/Admin/Products/Delete/${data}") class="btn btn-outline-danger">Delete</a>
                             `
 
                 }

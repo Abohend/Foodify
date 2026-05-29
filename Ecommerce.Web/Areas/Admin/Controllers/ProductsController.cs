@@ -43,7 +43,7 @@ namespace Ecommerce.Web.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ProductVM productVM = new ProductVM()
+            ProductCategoriesVM productVM = new ProductCategoriesVM()
             {
                 Product = new Product(),
                 Categories = _unitOfWork.Category.GetAll().Select(c => new SelectListItem
@@ -56,17 +56,17 @@ namespace Ecommerce.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult Create(ProductVM productVM, IFormFile file)
+        public IActionResult Create(ProductCategoriesVM productVM, IFormFile file)
         {
             if (ModelState.IsValid)
             {
                 if (file != null)
                 {
-                    productVM.Product.Image = _fileService.UploadFile("products", file);
+                    productVM.Product.Image = _fileService.UploadFile("images/products", file);
                 }
                 _unitOfWork.Product.Add(productVM.Product);
                 _unitOfWork.Complete();
-                TempData["toast"] = "Product has been created sucessfully";
+                TempData["toast"] = "Product has been created successfully";
                 TempData["toastType"] = "success";
                 return RedirectToAction("Index");
             }
@@ -86,7 +86,7 @@ namespace Ecommerce.Web.Areas.Admin.Controllers
             {
                 return NotFound();
             }
-            ProductVM productVM = new ProductVM()
+            ProductCategoriesVM productVM = new ProductCategoriesVM()
             {
                 Product = product,
                 Categories = _unitOfWork.Category.GetAll().Select(c => new SelectListItem
@@ -99,18 +99,18 @@ namespace Ecommerce.Web.Areas.Admin.Controllers
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult Edit(ProductVM productVM, IFormFile? file)
+        public IActionResult Edit(ProductCategoriesVM productVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
                 if (file != null)
                 {
                     _fileService.DeleteFile(productVM.Product.Image);
-                    productVM.Product.Image = _fileService.UploadFile("products", file);
+                    productVM.Product.Image = _fileService.UploadFile("images/products", file);
                 }
                 _unitOfWork.Product.Update(productVM.Product);
                 _unitOfWork.Complete();
-                TempData["toast"] = "Product has been updated sucessfully";
+                TempData["toast"] = "Product has been updated successfully";
                 TempData["toastType"] = "info";
                 return RedirectToAction("Index");
             }

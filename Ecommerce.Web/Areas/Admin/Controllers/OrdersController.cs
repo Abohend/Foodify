@@ -2,6 +2,7 @@
 using Ecommerce.Entities.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 using Utilities;
 
 namespace Ecommerce.Web.Areas.Admin.Controllers
@@ -68,12 +69,42 @@ namespace Ecommerce.Web.Areas.Admin.Controllers
                 ModelState.AddModelError("TrackingNumber", "Tracking number is required");
                 var newOrder = _unitOfWork.Order.GetOne(o => o.Id == order.Id, "OrderItems.Product");
                 return View("Details", new { id = order.Id });
-            } 
+            }
             order.OrderStatus = Status.Shipped;
             order.ShippingDate = DateTime.Now;
             _unitOfWork.Order.Update(order);
             _unitOfWork.Complete();
+
             return RedirectToAction("Details", new { id = order.Id });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelOrder(int id)
+        {
+            var order = _unitOfWork.Order.GetOne(o => o.Id == id);
+            if (order!.PaymentStatus == Status.Approved)
+            {
+                var refundOption = new RefundCreateOptions
+                {
+                    Reason = RefundReasons.RequestedByCustomer,
+                    PaymentIntent = order.PaymentIntentId
+                };
+
+                var refundService = new RefundService(); 
+                Refund refund = refundService.Create(refundOption);
+
+                order.PaymentStatus = Status.Refunded;
+            }
+            else
+            {
+                order.PaymentStatus = Status.Cancelled;
+            }
+            order.OrderStatus = Status.Cancelled;
+            _unitOfWork.Complete();
+
+            return RedirectToAction("Details", new { id });
+        }
+
     }
 }

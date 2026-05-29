@@ -78,7 +78,7 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Entities.Models.Category", b =>
@@ -97,13 +97,116 @@ namespace Ecommerce.DataAccess.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Fresh fruits",
+                            Image = "images/categories/Fruits.png",
+                            Name = "Fruits"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Fresh vegetables",
+                            Image = "images/categories/Vegetables.jpg",
+                            Name = "Vegetables"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "High quality bread",
+                            Image = "images/categories/Bread.jpg",
+                            Name = "Bread"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CreatedTime = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "All meat types",
+                            Image = "images/categories/Meat.jpg",
+                            Name = "Meat"
+                        });
+                });
+
+            modelBuilder.Entity("Ecommerce.Entities.Models.ContactInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactInfos", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Address = "123 Street, Nasr City, Egypt",
+                            Email = "info@example.com",
+                            Phone = "+201065964363"
+                        });
+                });
+
+            modelBuilder.Entity("Ecommerce.Entities.Models.ContactMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactMessages", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Entities.Models.Order", b =>
@@ -167,7 +270,28 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
+                });
+
+            modelBuilder.Entity("Ecommerce.Entities.Models.OrderItem", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("OrderId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Entities.Models.OrderItem", b =>
@@ -221,7 +345,81 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            Description = "Fresh grapes",
+                            Image = "images/products/grapes.jpg",
+                            Name = "Grapes",
+                            Price = 4.99m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 1,
+                            Description = "Fresh Raspberries",
+                            Image = "images/products/Raspberries.jpg",
+                            Name = "Raspberries",
+                            Price = 5.99m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 2,
+                            Description = "Fresh brocoli",
+                            Image = "images/products/Brocoli.jpg",
+                            Name = "Brocoli",
+                            Price = 2.5m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoryId = 2,
+                            Description = "High quality potatoes",
+                            Image = "images/products/Potatoes.jpg",
+                            Name = "Potatoes",
+                            Price = 1.4m
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoryId = 3,
+                            Description = "Wellbacked breadsticks",
+                            Image = "images/products/Breadsticks.jpg",
+                            Name = "Breadsticks",
+                            Price = 1.93m
+                        },
+                        new
+                        {
+                            Id = 6,
+                            CategoryId = 3,
+                            Description = "Wellbacked croissant",
+                            Image = "images/products/Croissant.jpg",
+                            Name = "Croissant",
+                            Price = 2.14m
+                        },
+                        new
+                        {
+                            Id = 7,
+                            CategoryId = 4,
+                            Description = "Basic cuts of beef",
+                            Image = "images/products/Beef.jpg",
+                            Name = "Beef",
+                            Price = 9.14m
+                        },
+                        new
+                        {
+                            Id = 8,
+                            CategoryId = 4,
+                            Description = "Basic cuts of lamp meat",
+                            Image = "images/products/Lamp.webp",
+                            Name = "Lamp",
+                            Price = 10.45m
+                        });
                 });
 
             modelBuilder.Entity("Ecommerce.Entities.Models.ShoppingCartItem", b =>
@@ -239,7 +437,26 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ShoppingCartItems");
+                    b.ToTable("ShoppingCartItems", (string)null);
+                });
+
+            modelBuilder.Entity("Ecommerce.Entities.Models.WebsiteView", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WebsiteViews", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -258,7 +475,7 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -280,7 +497,7 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RoleClaims");
+                    b.ToTable("RoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -302,7 +519,7 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserClaims");
+                    b.ToTable("UserClaims", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -321,7 +538,7 @@ namespace Ecommerce.DataAccess.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("UserLogins");
+                    b.ToTable("UserLogins", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
@@ -334,7 +551,7 @@ namespace Ecommerce.DataAccess.Migrations
 
                     b.HasKey("RoleId", "UserId");
 
-                    b.ToTable("UserRoles");
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -353,7 +570,7 @@ namespace Ecommerce.DataAccess.Migrations
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("UserTokens");
+                    b.ToTable("UserTokens", (string)null);
                 });
 
             modelBuilder.Entity("Ecommerce.Entities.Models.Order", b =>

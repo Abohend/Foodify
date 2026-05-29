@@ -12,6 +12,9 @@ namespace Ecommerce.DataAccess.Implementations
         public IShoppingCartReposiotry ShoppingCart { get; }
         public IOrderRepository Order { get; }
         public IOrderItemRepository OrderItem { get; }
+        public IContactInfoRepository ContactInfo { get; }
+        public IContactMessageRepository ContactMessage { get; }
+        public IWebsiteViewRepository WebsiteView { get; }
 
         public UnitOfWork(Context context)
         {
@@ -20,6 +23,9 @@ namespace Ecommerce.DataAccess.Implementations
             this.ShoppingCart = new ShoppingCartRepository(context);
             this.Order = new OrderRepository(context);
             this.OrderItem = new OrderItemRepository(context);
+            this.ContactInfo = new ContactInfoRepository(context);
+            this.ContactMessage = new ContactMessageRepository(context);
+            this.WebsiteView = new WebsiteViewRepository(context);
             this._context = context;
         }
 
